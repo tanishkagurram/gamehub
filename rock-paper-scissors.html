@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #e8ebe4 0%, #f5f5f0 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: 0 20px 60px rgba(138, 154, 126, 0.3);
+            border: 2px solid rgba(138, 154, 126, 0.3);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+
+        h1 {
+            color: #6b7c5e;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(138, 154, 126, 0.2);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(138, 154, 126, 0.15);
+            border-radius: 15px;
+        }
+
+        .score-item {
+            text-align: center;
+        }
+
+        .score-label {
+            color: #8a9a7e;
+            font-size: 1em;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .score-value {
+            color: #6b7c5e;
+            font-size: 3em;
+            font-weight: bold;
+        }
+
+        .choices-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            color: #6b7c5e;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .choices {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .choice {
+            background: #f5f5dc;
+            border: 3px solid #a0b090;
+            border-radius: 50%;
+            width: 120px;
+            height: 120px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(138, 154, 126, 0.2);
+        }
+
+        .choice:hover {
+            background: #fafae6;
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 16px rgba(138, 154, 126, 0.4);
+        }
+
+        .choice:active {
+            transform: scale(0.95);
+        }
+
+        .choice.selected {
+            background: #8a9a7e;
+            border-color: #6b7c5e;
+            animation: pulse 0.5s ease;
+        }
+
+        .choice.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .battle-area {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 30px 0;
+            padding: 30px;
+            background: rgba(138, 154, 126, 0.1);
+            border-radius: 20px;
+            min-height: 180px;
+        }
+
+        .battle-choice {
+            text-align: center;
+        }
+
+        .battle-emoji {
+            font-size: 5em;
+            margin-bottom: 10px;
+            animation: bounceIn 0.5s ease;
+        }
+
+        .battle-label {
+            color: #8a9a7e;
+            font-size: 1em;
+            font-weight: bold;
+        }
+
+        .vs-text {
+            font-size: 2em;
+            color: #6b7c5e;
+            font-weight: bold;
+        }
+
+        .result-message {
+            font-size: 1.8em;
+            color: #6b7c5e;
+            margin: 20px 0;
+            min-height: 60px;
+            font-weight: bold;
+        }
+
+        .reset-button {
+            background: #8a9a7e;
+            color: #f5f5dc;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(138, 154, 126, 0.3);
+        }
+
+        .reset-button:hover {
+            background: #7a8a6e;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(138, 154, 126, 0.4);
+        }
+
+        .rules {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(138, 154, 126, 0.1);
+            border-radius: 15px;
+            color: #8a9a7e;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        /* Popup Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeInOverlay 0.3s ease;
+        }
+
+        .popup {
+            background: linear-gradient(135deg, #f5f5dc 0%, #fafae6 100%);
+            border: 4px solid #8a9a7e;
+            border-radius: 30px;
+            padding: 40px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            animation: popupBounce 0.5s ease;
+            max-width: 400px;
+        }
+
+        .popup.win {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        }
+
+        .popup-emoji {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: emojiSpin 0.6s ease;
+        }
+
+        .popup.win .popup-emoji {
+            animation: emojiCelebrate 0.8s ease;
+        }
+
+        .popup-text {
+            font-size: 2em;
+            color: #6b7c5e;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .popup-subtext {
+            font-size: 1.2em;
+            color: #8a9a7e;
+            margin-bottom: 20px;
+        }
+
+        .popup-button {
+            background: #8a9a7e;
+            color: #f5f5dc;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 15px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(138, 154, 126, 0.3);
+        }
+
+        .popup-button:hover {
+            background: #7a8a6e;
+            transform: translateY(-2px);
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #8a9a7e;
+            animation: confettiFall 3s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0);
+                opacity: 0;
+            }
+            60% {
+                transform: scale(1.2);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes fadeInOverlay {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes popupBounce {
+            0% {
+                transform: scale(0) rotate(-180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(10deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes emojiSpin {
+            0% {
+                transform: rotate(0deg) scale(0);
+            }
+            50% {
+                transform: rotate(180deg) scale(1.2);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+            }
+        }
+
+        @keyframes emojiCelebrate {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            25% {
+                transform: scale(1.3) rotate(-15deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(15deg);
+            }
+            75% {
+                transform: scale(1.3) rotate(-10deg);
+            }
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: fireworkExplode 1s ease-out forwards;
+        }
+
+        @keyframes fireworkExplode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+
+        .popup.win .popup-emoji {
+            animation: emojiCelebrate 0.8s ease, float 2s ease-in-out infinite 0.8s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .star {
+            position: absolute;
+            font-size: 2em;
+            animation: starTwinkle 1.5s ease-in-out infinite;
+        }
+
+        @keyframes starTwinkle {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5) rotate(180deg);
+            }
+        }
+
+        .trophy-bounce {
+            animation: trophyBounce 0.5s ease infinite;
+        }
+
+        @keyframes trophyBounce {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-15px) scale(1.1);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .choices {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .choice {
+                width: 100px;
+                height: 100px;
+                font-size: 3em;
+            }
+
+            .battle-area {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .vs-text {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🪨 Rock Paper Scissors ✂</h1>
+
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">You</div>
+                <div class="score-value" id="playerScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Computer</div>
+                <div class="score-value" id="computerScore">0</div>
+            </div>
+        </div>
+
+        <div class="choices-section">
+            <div class="section-title">Choose your weapon!</div>
+            <div class="choices">
+                <div class="choice" onclick="playGame('rock')" data-choice="rock">🪨</div>
+                <div class="choice" onclick="playGame('paper')" data-choice="paper">📄</div>
+                <div class="choice" onclick="playGame('scissors')" data-choice="scissors">✂</div>
+            </div>
+        </div>
+
+        <div class="battle-area" id="battleArea" style="display: none;">
+            <div class="battle-choice">
+                <div class="battle-emoji" id="playerChoice"></div>
+                <div class="battle-label">You</div>
+            </div>
+            <div class="vs-text">VS</div>
+            <div class="battle-choice">
+                <div class="battle-emoji" id="computerChoice"></div>
+                <div class="battle-label">Computer</div>
+            </div>
+        </div>
+
+        <div class="result-message" id="resultMessage">Make your choice!</div>
+
+        <button class="reset-button" onclick="resetGame()">🔄 Reset Game</button>
+
+        <div class="rules">
+            <strong>How to Play:</strong><br>
+            🪨 Rock crushes Scissors<br>
+            📄 Paper covers Rock<br>
+            ✂ Scissors cuts Paper<br>
+            First to 3 points wins!
+        </div>
+    </div>
+
+    <script>
+        let playerScore = 0;
+        let computerScore = 0;
+        const choices = ['rock', 'paper', 'scissors'];
+        const emojis = { rock: '🪨', paper: '📄', scissors: '✂' };
+
+        function playGame(playerChoice) {
+            if (playerScore >= 3 || computerScore >= 3) {
+                return;
+            }
+
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            const result = getResult(playerChoice, computerChoice);
+
+            showBattle(playerChoice, computerChoice);
+            
+            setTimeout(() => {
+                updateResult(result, playerChoice, computerChoice);
+                updateScore(result);
+                checkWinner();
+            }, 1000);
+        }
+
+        function showBattle(playerChoice, computerChoice) {
+            const battleArea = document.getElementById('battleArea');
+            const playerChoiceEl = document.getElementById('playerChoice');
+            const computerChoiceEl = document.getElementById('computerChoice');
+
+            battleArea.style.display = 'flex';
+            playerChoiceEl.textContent = emojis[playerChoice];
+            computerChoiceEl.textContent = emojis[computerChoice];
+        }
+
+        function getResult(player, computer) {
+            if (player === computer) {
+                return 'tie';
+            } else if (
+                (player === 'rock' && computer === 'scissors') ||
+                (player === 'paper' && computer === 'rock') ||
+                (player === 'scissors' && computer === 'paper')
+            ) {
+                return 'win';
+            } else {
+                return 'lose';
+            }
+        }
+
+        function updateResult(result, playerChoice, computerChoice) {
+            const resultDiv = document.getElementById('resultMessage');
+
+            if (result === 'win') {
+        resultDiv.textContent = `You win this round! ${emojis[playerChoice]} beats ${emojis[computerChoice]}`;
+                resultDiv.style.color = '#6b7c5e';
+            } else if (result === 'lose') {
+        resultDiv.textContent = `You lose this round! ${emojis[computerChoice]} beats ${emojis[playerChoice]}`;
+                resultDiv.style.color = '#8a9a7e';
+            } else {
+        resultDiv.textContent = `It's a tie! Both chose ${emojis[playerChoice]}`;
+                resultDiv.style.color = '#a0b090';
+            }
+        }
+
+        function updateScore(result) {
+            if (result === 'win') {
+                playerScore++;
+                document.getElementById('playerScore').textContent = playerScore;
+            } else if (result === 'lose') {
+                computerScore++;
+                document.getElementById('computerScore').textContent = computerScore;
+            }
+        }
+
+        function checkWinner() {
+            if (playerScore >= 3) {
+                setTimeout(() => showWinPopup(), 500);
+                disableChoices();
+            } else if (computerScore >= 3) {
+                setTimeout(() => showLosePopup(), 500);
+                disableChoices();
+            }
+        }
+
+        function disableChoices() {
+            const choiceElements = document.querySelectorAll('.choice');
+            choiceElements.forEach(choice => {
+                choice.classList.add('disabled');
+            });
+        }
+
+        function enableChoices() {
+            const choiceElements = document.querySelectorAll('.choice');
+            choiceElements.forEach(choice => {
+                choice.classList.remove('disabled');
+            });
+        }
+
+        function showWinPopup() {
+            const messages = [
+                { emoji: '🎉', text: 'Victory!', subtext: 'You are the Rock Paper Scissors champion!' },
+                { emoji: '🏆', text: 'Amazing!', subtext: 'You totally crushed the computer!' },
+                { emoji: '⭐', text: 'Brilliant!', subtext: 'Your strategy was unbeatable!' },
+                { emoji: '👑', text: 'Legendary!', subtext: 'Bow down to the master!' },
+                { emoji: '🌟', text: 'Incredible!', subtext: 'That was a flawless victory!' },
+                { emoji: '🎊', text: 'Spectacular!', subtext: 'You made it look easy!' },
+                { emoji: '✨', text: 'Phenomenal!', subtext: 'The computer never stood a chance!' },
+                { emoji: '🔥', text: 'On Fire!', subtext: 'You are absolutely dominating!' }
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'popup-overlay';
+            overlay.innerHTML = `
+                <div class="popup win">
+                    <div class="popup-emoji trophy-bounce">${randomMessage.emoji}</div>
+                    <div class="popup-text">${randomMessage.text}</div>
+                    <div class="popup-subtext">${randomMessage.subtext}</div>
+                    <div style="font-size: 1.1em; color: #6b7c5e; margin: 15px 0;">Final Score: ${playerScore} - ${computerScore}</div>
+                    <button class="popup-button" onclick="closePopup()">🔄 Play Again</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+            createConfetti();
+            createFireworks();
+            createStars();
+        }
+
+        function showLosePopup() {
+            const messages = [
+                { emoji: '😢', text: 'So close!', subtext: 'The computer got lucky this time!' },
+                { emoji: '🤖', text: 'Computer wins!', subtext: 'That AI is pretty sneaky!' },
+                { emoji: '💪', text: 'Try again!', subtext: 'You can totally beat it next time!' },
+                { emoji: '😅', text: 'Almost there!', subtext: 'Just need a bit more luck!' },
+                { emoji: '🎯', text: 'Nice try!', subtext: 'Your choices were so close!' },
+                { emoji: '😤', text: 'Rematch time!', subtext: 'Show that computer who\'s boss!' },
+                { emoji: '🎲', text: 'Bad luck!', subtext: 'The odds weren\'t in your favor!' },
+                { emoji: '🌈', text: 'Keep going!', subtext: 'Every champion loses sometimes!' }
+            ];
+            
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            
+            const overlay = document.createElement('div');
+            overlay.className = 'popup-overlay';
+            overlay.innerHTML = `
+                <div class="popup">
+                    <div class="popup-emoji">${randomMessage.emoji}</div>
+                    <div class="popup-text">${randomMessage.text}</div>
+                    <div class="popup-subtext">${randomMessage.subtext}</div>
+                    <div style="font-size: 1.1em; color: #8a9a7e; margin: 15px 0;">Final Score: ${playerScore} - ${computerScore}</div>
+                    <button class="popup-button" onclick="closePopup()">🔄 Play Again</button>
+                </div>
+            `;
+            
+            document.body.appendChild(overlay);
+        }
+
+        function createConfetti() {
+            const colors = ['#8a9a7e', '#a0b090', '#6b7c5e', '#f5f5dc', '#ffd700'];
+            const overlay = document.querySelector('.popup-overlay');
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + '%';
+                confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 0.5 + 's';
+                confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                overlay.appendChild(confetti);
+            }
+        }
+
+        function createFireworks() {
+            const colors = ['#ffd700', '#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7'];
+            const overlay = document.querySelector('.popup-overlay');
+            
+            // Create multiple firework bursts
+            for (let burst = 0; burst < 3; burst++) {
+                setTimeout(() => {
+                    const burstX = 20 + Math.random() * 60; // Random position between 20-80%
+                    const burstY = 20 + Math.random() * 40; // Random position between 20-60%
+                    
+                    for (let i = 0; i < 30; i++) {
+                        const firework = document.createElement('div');
+                        firework.className = 'firework';
+                        firework.style.left = burstX + '%';
+                        firework.style.top = burstY + '%';
+                        firework.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        
+                        const angle = (i / 30) * Math.PI * 2;
+                        const distance = 100 + Math.random() * 100;
+                        const tx = Math.cos(angle) * distance;
+                        const ty = Math.sin(angle) * distance;
+                        
+                        firework.style.setProperty('--tx', tx + 'px');
+                        firework.style.setProperty('--ty', ty + 'px');
+                        
+                        overlay.appendChild(firework);
+                        
+                        setTimeout(() => firework.remove(), 1000);
+                    }
+                }, burst * 400);
+            }
+        }
+
+        function createStars() {
+            const overlay = document.querySelector('.popup-overlay');
+            const starEmojis = ['⭐', '✨', '🌟', '💫'];
+            
+            for (let i = 0; i < 8; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = starEmojis[Math.floor(Math.random() * starEmojis.length)];
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 0.5 + 's';
+                overlay.appendChild(star);
+            }
+        }
+
+        function closePopup() {
+            const overlay = document.querySelector('.popup-overlay');
+            if (overlay) {
+                overlay.remove();
+            }
+            resetGame();
+        }
+
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            document.getElementById('playerScore').textContent = '0';
+            document.getElementById('computerScore').textContent = '0';
+            document.getElementById('resultMessage').textContent = 'Make your choice!';
+            document.getElementById('resultMessage').style.color = '#6b7c5e';
+            document.getElementById('battleArea').style.display = 'none';
+            enableChoices();
+        }
+    </script>
+</body>
+</html>

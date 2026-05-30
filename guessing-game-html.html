@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mystery Number Guessing Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background 0.5s ease;
+            overflow-y: auto;
+        }
+
+        /* Updated color theme using your palette */
+        .bg-level-1 { background: linear-gradient(135deg, #8a9a7e, #6b7f5e); }
+        .bg-level-2 { background: linear-gradient(135deg, #6b7f5e, #8a9a7e); }
+        .bg-level-3 { background: linear-gradient(135deg, #8a9a7e, #6b7f5e); }
+        .bg-level-4 { background: linear-gradient(135deg, #6b7f5e, #7a8a6e); }
+        .bg-level-5 { background: linear-gradient(135deg, #7a8a6e, #6b7f5e); }
+
+        .container {
+            background: #f5f5f0;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(107, 127, 94, 0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Confetti Animation Styles */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #6b7f5e;
+            position: absolute;
+            animation: confetti-fall 3s linear forwards;
+            z-index: 1000;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Shake Animation for Wrong Answer */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        .shake-animation {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        /* Bounce Animation for Correct Answer */
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-30px); }
+            60% { transform: translateY(-15px); }
+        }
+
+        .bounce-animation {
+            animation: bounce 1s ease;
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .pulse-animation {
+            animation: pulse 0.5s ease-in-out;
+        }
+
+        /* Sad Emoji Animation */
+        .sad-emoji {
+            position: fixed;
+            font-size: 60px;
+            animation: sad-fall 2s ease-out forwards;
+            z-index: 1000;
+            pointer-events: none;
+        }
+
+        @keyframes sad-fall {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(300px) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        /* Success Burst Animation */
+        @keyframes burst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(0) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .burst-animation {
+            animation: burst 0.6s ease-out;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .level-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            font-size: 18px;
+            color: #6b7f5e;
+        }
+
+        .icon {
+            width: 24px;
+            height: 24px;
+        }
+
+        .score-box {
+            text-align: right;
+        }
+
+        .score-label {
+            font-size: 12px;
+            color: #6b7f5e;
+        }
+
+        .score-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #6b7f5e;
+        }
+
+        .title {
+            font-size: 36px;
+            color: #6b7f5e;
+            margin: 15px 0 10px 0;
+        }
+
+        .subtitle {
+            color: #8a9a7e;
+            font-size: 16px;
+        }
+
+        .current-score-box {
+            background: linear-gradient(135deg, #e8ebe4, #f5f5f0);
+            border: 2px solid #8a9a7e;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .score-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .score-title {
+            font-weight: bold;
+            color: #6b7f5e;
+        }
+
+        .current-points {
+            font-size: 28px;
+            font-weight: bold;
+            color: #6b7f5e;
+        }
+
+        .penalty-info {
+            font-size: 11px;
+            color: #8a9a7e;
+        }
+
+        .hints-box {
+            background: #e8ebe4;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #8a9a7e;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .hints-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: #6b7f5e;
+            margin-bottom: 12px;
+        }
+
+        .hint-item {
+            color: #6b7f5e;
+            font-size: 14px;
+            margin-bottom: 8px;
+            padding-left: 12px;
+        }
+
+        .hint-button {
+            width: 100%;
+            background: #8a9a7e;
+            color: #f5f5f0;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+
+        .hint-button:hover {
+            background: #6b7f5e;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="number"] {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #8a9a7e;
+            border-radius: 8px;
+            font-size: 18px;
+            transition: border 0.3s;
+            background: #f5f5f0;
+            color: #6b7f5e;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #6b7f5e;
+        }
+
+        .guess-button {
+            background: #6b7f5e;
+            color: #f5f5f0;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .guess-button:hover {
+            background: #5a6e4d;
+        }
+
+        .message-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .message-info {
+            background: #e8ebe4;
+            color: #6b7f5e;
+            border: 1px solid #8a9a7e;
+        }
+
+        .message-success {
+            background: #8a9a7e;
+            color: #f5f5f0;
+        }
+
+        .win-box {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #8a9a7e, #6b7f5e);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            color: #f5f5f0;
+        }
+
+        .trophy {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        .win-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: #f5f5f0;
+            margin-bottom: 10px;
+        }
+
+        .win-details {
+            color: #f5f5f0;
+            margin-bottom: 5px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-next {
+            flex: 1;
+            background: linear-gradient(135deg, #6b7f5e, #8a9a7e);
+            color: #f5f5f0;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-next:hover {
+            transform: scale(1.05);
+        }
+
+        .btn-retry {
+            flex: 1;
+            background: #8a9a7e;
+            color: #f5f5f0;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-retry:hover {
+            background: #6b7f5e;
+        }
+
+        .guesses-box {
+            margin-top: 20px;
+        }
+
+        .guesses-label {
+            font-size: 13px;
+            font-weight: bold;
+            color: #6b7f5e;
+            margin-bottom: 10px;
+        }
+
+        .guesses-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .guess-tag {
+            background: #e8ebe4;
+            color: #6b7f5e;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            border: 1px solid #8a9a7e;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #e8ebe4;
+            color: #8a9a7e;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body class="bg-level-1" id="body">
+    <div class="container">
+        <div class="header">
+            <div class="level-info">
+                <div class="level-badge">
+                    <span id="levelIcon">⭐</span>
+                    <span id="levelText">Level 1: Easy</span>
+                </div>
+                <div class="score-box">
+                    <div class="score-label">Total Score</div>
+                    <div class="score-value" id="totalScore">0</div>
+                </div>
+            </div>
+            <div style="font-size: 40px;">✨</div>
+            <h1 class="title">Mystery Number Game</h1>
+            <p class="subtitle">Guess the 2-digit number!</p>
+        </div>
+
+        <div id="gameArea">
+            <div class="current-score-box">
+                <div class="score-row">
+                    <span class="score-title">Current Round Score:</span>
+                    <span class="current-points" id="currentScore">100</span>
+                </div>
+                <div class="penalty-info">
+                    • Each wrong guess: -5 points<br>
+                    • Each hint reveal: -15 points
+                </div>
+            </div>
+
+            <div class="hints-box">
+                <div class="hints-header">
+                    <span>💡</span>
+                    <span id="hintCounter">Hints (1/4):</span>
+                </div>
+                <div id="hintsContainer"></div>
+                <button class="hint-button" id="revealHintBtn" onclick="revealNextHint()">
+                    💡 Reveal Next Hint (-15 points)
+                </button>
+            </div>
+
+            <div class="input-group" id="inputGroup">
+                <input type="number" id="guessInput" placeholder="Enter 10-99" min="10" max="99">
+                <button class="guess-button" onclick="makeGuess()">Guess</button>
+            </div>
+
+            <div id="messageBox" style="display: none;"></div>
+
+            <div class="guesses-box" id="guessesBox" style="display: none;">
+                <div class="guesses-label">Your guesses (<span id="guessCount">0</span>):</div>
+                <div class="guesses-list" id="guessesList"></div>
+            </div>
+        </div>
+
+        <div id="winArea" style="display: none;">
+            <div class="win-box">
+                <div class="trophy">🏆</div>
+                <div class="win-title" id="winMessage"></div>
+                <div class="win-details">The number was <span id="correctNumber"></span>!</div>
+                <div class="win-details">Guesses: <span id="finalGuesses"></span></div>
+                <div class="win-details">Hints used: <span id="finalHints"></span></div>
+            </div>
+            <div class="button-group">
+                <button class="btn-next" id="nextBtn" onclick="nextLevel()">Next Level →</button>
+                <button class="btn-retry" onclick="retryLevel()">Retry Level</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            Challenge yourself! Use fewer hints and guesses for maximum points! 🏆
+        </div>
+    </div>
+
+    <script>
+        const levelData = {
+            1: {
+                name: "Easy",
+                color: "bg-level-1",
+                icon: "⭐",
+                mysteries: [
+                    { number: 25, hints: ["It's a winter holiday in December", "Santa Claus delivers presents", "Jesus Christ's birthday celebration", "December 25th - Christmas Day"] },
+                    { number: 31, hints: ["Spooky night with costumes", "Kids say 'trick or treat'", "October's last day", "Halloween - October 31st"] },
+                    { number: 14, hints: ["Day of love and romance", "Cupid shoots arrows", "Roses and chocolate boxes", "Valentine's Day - February 14th"] },
+                    { number: 26, hints: ["India became a republic", "Grand parade at Rajpath, Delhi", "Constitution came into effect", "Republic Day - January 26th"] },
+                    { number: 15, hints: ["India's freedom from British rule", "Tricolor flag hoisting day", "Jawaharlal Nehru's famous speech", "Independence Day - August 15th"] }
+                ]
+            },
+            2: {
+                name: "Medium",
+                color: "bg-level-2",
+                icon: "⭐",
+                mysteries: [
+                    { number: 23, hints: ["NBA legend's jersey number", "Won 6 championships with Bulls", "His Airness, the GOAT", "Michael Jordan - #23"] },
+                    { number: 10, hints: ["Soccer's greatest player", "Argentina's World Cup hero 2022", "8 Ballon d'Or awards", "Lionel Messi - #10"] },
+                    { number: 42, hints: ["Supercomputer's answer in sci-fi", "Life, universe, and everything", "Douglas Adams' famous book", "Hitchhiker's Guide - 42"] },
+                    { number: 56, hints: ["India's telecom revolution year", "Mobile phones became common", "STD booths everywhere", "Year 1956 - telecom milestone"] },
+                    { number: 99, hints: ["Hockey legend's number", "The Great One from Canada", "Most NHL records holder", "Wayne Gretzky - #99"] }
+                ]
+            },
+            3: {
+                name: "Hard",
+                color: "bg-level-3",
+                icon: "⭐",
+                mysteries: [
+                    { number: 27, hints: ["Perfect cube number", "Lives lost in famous club tragedy", "3 × 3 × 3", "The 27 Club - cursed age"] },
+                    { number: 73, hints: ["Sheldon Cooper calls it perfect", "Its mirror 37 is also prime", "Binary: 1001001", "Best number according to Big Bang Theory"] },
+                    { number: 47, hints: ["Star Trek's recurring number", "15th prime number", "Appears in every episode", "The 47 Society - Pomona College"] },
+                    { number: 69, hints: ["Yin-yang balance position", "Internet's favorite number", "Sum of three consecutive primes", "Nice number meme culture"] },
+                    { number: 88, hints: ["Lucky in Chinese culture", "Looks like infinity twice", "Piano keys count", "Back to the Future speed"] }
+                ]
+            },
+            4: {
+                name: "Expert",
+                color: "bg-level-4",
+                icon: "⭐",
+                mysteries: [
+                    { number: 37, hints: ["Body temperature in Celsius", "First irregular prime", "Unique prime property", "Appears in many patterns"] },
+                    { number: 54, hints: ["Cards in a deck with jokers", "3³ × 2", "Studio 54 famous club", "Atomic number of Xenon"] },
+                    { number: 61, hints: ["Minutes in an hour plus one", "Twin prime with 59", "6th centered hexagonal number", "Curie's atomic number"] },
+                    { number: 89, hints: ["11th Fibonacci number", "Mersenne prime exponent", "Largest 2-digit prime", "Actinium's atomic number"] },
+                    { number: 92, hints: ["Atomic number of Uranium", "Number of natural elements", "Piano keys on standard keyboard", "Regular polyhedra vertices"] }
+                ]
+            },
+            5: {
+                name: "Master",
+                color: "bg-level-5",
+                icon: "🔥",
+                mysteries: [
+                    { number: 41, hints: ["Sum of first 6 primes", "13th smallest prime", "Centered square number", "Newman-Shanks-Williams prime"] },
+                    { number: 67, hints: ["19th prime number", "Twin prime with 71 nearby", "3-smooth number plus 3", "Atomic number of Holmium"] },
+                    { number: 83, hints: ["23rd prime number", "Sophie Germain prime", "Sum of five consecutive primes", "Atomic number of Bismuth"] },
+                    { number: 71, hints: ["20th prime number", "Largest number on roulette wheel", "Pillars of wisdom in Confucius", "Lutetium's atomic number"] },
+                    { number: 97, hints: ["25th prime number", "Largest 2-digit prime", "Chen prime and Eisenstein prime", "Berkelium's atomic number"] }
+                ]
+            }
+        };
+
+        let currentLevel = 1;
+        let currentMystery = null;
+        let guesses = [];
+        let hintsRevealed = 0;
+        let currentScore = 100;
+        let totalScore = 0;
+        let won = false;
+
+        // Animation Functions
+        function createConfetti() {
+            const colors = ['#6b7f5e', '#8a9a7e', '#e8ebe4', '#f5f5f0'];
+            const confettiCount = 100;
+
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(() => {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * window.innerWidth + 'px';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.width = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.height = (Math.random() * 10 + 5) + 'px';
+                    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                    
+                    document.body.appendChild(confetti);
+
+                    setTimeout(() => {
+                        confetti.remove();
+                    }, 4000);
+                }, i * 15);
+            }
+        }
+
+        function createSadEmojis() {
+            const emojis = ['😢', '😞', '😔', '😿', '💔'];
+            const emojiCount = 5;
+
+            for (let i = 0; i < emojiCount; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.className = 'sad-emoji';
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.left = Math.random() * (window.innerWidth - 60) + 'px';
+                    emoji.style.top = '-100px';
+                    
+                    document.body.appendChild(emoji);
+
+                    setTimeout(() => {
+                        emoji.remove();
+                    }, 2000);
+                }, i * 200);
+            }
+        }
+
+        function shakeElement(element) {
+            element.classList.add('shake-animation');
+            setTimeout(() => {
+                element.classList.remove('shake-animation');
+            }, 500);
+        }
+
+        function bounceElement(element) {
+            element.classList.add('bounce-animation');
+            setTimeout(() => {
+                element.classList.remove('bounce-animation');
+            }, 1000);
+        }
+
+        function pulseElement(element) {
+            element.classList.add('pulse-animation');
+            setTimeout(() => {
+                element.classList.remove('pulse-animation');
+            }, 500);
+        }
+
+        function startNewGame() {
+            const mysteries = levelData[currentLevel].mysteries;
+            currentMystery = mysteries[Math.floor(Math.random() * mysteries.length)];
+            guesses = [];
+            hintsRevealed = 0;
+            currentScore = 100;
+            won = false;
+
+            document.getElementById('gameArea').style.display = 'block';
+            document.getElementById('winArea').style.display = 'none';
+            document.getElementById('guessInput').value = '';
+            document.getElementById('messageBox').style.display = 'none';
+            document.getElementById('guessesBox').style.display = 'none';
+            document.getElementById('guessesList').innerHTML = '';
+            
+            updateLevelDisplay();
+            displayHints();
+            updateScore();
+        }
+
+        function updateLevelDisplay() {
+            const levelInfo = levelData[currentLevel];
+            document.getElementById('levelText').textContent = `Level ${currentLevel}: ${levelInfo.name}`;
+            document.getElementById('levelIcon').textContent = levelInfo.icon;
+            document.body.className = levelInfo.color;
+            document.getElementById('totalScore').textContent = totalScore;
+        }
+
+        function displayHints() {
+            const container = document.getElementById('hintsContainer');
+            container.innerHTML = '';
+            
+            for (let i = 0; i <= hintsRevealed && i < currentMystery.hints.length; i++) {
+                const hint = document.createElement('div');
+                hint.className = 'hint-item';
+                hint.textContent = '• ' + currentMystery.hints[i];
+                container.appendChild(hint);
+            }
+
+            document.getElementById('hintCounter').textContent = 
+                `Hints (${hintsRevealed + 1}/${currentMystery.hints.length}):`;
+
+            if (hintsRevealed >= currentMystery.hints.length - 1) {
+                document.getElementById('revealHintBtn').style.display = 'none';
+            } else {
+                document.getElementById('revealHintBtn').style.display = 'block';
+            }
+        }
+
+        function revealNextHint() {
+            if (hintsRevealed < currentMystery.hints.length - 1) {
+                hintsRevealed++;
+                currentScore = Math.max(currentScore - 15, 0);
+                displayHints();
+                updateScore();
+                showMessage('💡 New hint revealed! -15 points', 'info');
+            }
+        }
+
+        function updateScore() {
+            document.getElementById('currentScore').textContent = currentScore;
+            document.getElementById('totalScore').textContent = totalScore;
+        }
+
+        function showMessage(text, type) {
+            const messageBox = document.getElementById('messageBox');
+            messageBox.textContent = text;
+            messageBox.className = type === 'success' ? 'message-box message-success' : 'message-box message-info';
+            messageBox.style.display = 'block';
+            
+            pulseElement(messageBox);
+        }
+
+        function makeGuess() {
+            if (won) return;
+
+            const input = document.getElementById('guessInput');
+            const guess = parseInt(input.value);
+
+            if (!input.value || isNaN(guess) || guess < 10 || guess > 99) {
+                showMessage('Please enter a valid 2-digit number (10-99)', 'info');
+                shakeElement(document.getElementById('inputGroup'));
+                return;
+            }
+
+            if (guesses.includes(guess)) {
+                showMessage('You already guessed that number!', 'info');
+                shakeElement(document.getElementById('inputGroup'));
+                return;
+            }
+
+            guesses.push(guess);
+            currentScore = Math.max(currentScore - 5, 0);
+            updateScore();
+
+            const guessesList = document.getElementById('guessesList');
+            const tag = document.createElement('span');
+            tag.className = 'guess-tag';
+            tag.textContent = guess;
+            guessesList.appendChild(tag);
+
+            document.getElementById('guessesBox').style.display = 'block';
+            document.getElementById('guessCount').textContent = guesses.length;
+
+            if (guess === currentMystery.number) {
+                won = true;
+                totalScore += currentScore;
+                updateScore();
+                
+                createConfetti();
+                bounceElement(document.querySelector('.container'));
+                pulseElement(document.getElementById('totalScore'));
+                
+                showWin();
+            } else {
+                shakeElement(document.getElementById('inputGroup'));
+                createSadEmojis();
+                
+                if (guess < currentMystery.number) {
+                    showMessage('📈 Too low! Try a higher number. -5 points', 'info');
+                } else {
+                    showMessage('📉 Too high! Try a lower number. -5 points', 'info');
+                }
+            }
+
+            input.value = '';
+        }
+
+        function showWin() {
+            document.getElementById('gameArea').style.display = 'none';
+            document.getElementById('winArea').style.display = 'block';
+            document.getElementById('winMessage').textContent = `🎉 Correct! You earned ${currentScore} points!`;
+            document.getElementById('correctNumber').textContent = currentMystery.number;
+            document.getElementById('finalGuesses').textContent = guesses.length;
+            document.getElementById('finalHints').textContent = `${hintsRevealed + 1}/${currentMystery.hints.length}`;
+
+            const nextBtn = document.getElementById('nextBtn');
+            if (currentLevel < 5) {
+                nextBtn.textContent = 'Next Level →';
+                nextBtn.className = 'btn-next';
+            } else {
+                nextBtn.textContent = '🏆 Play Again';
+                nextBtn.style.background = 'linear-gradient(135deg, #6b7f5e, #8a9a7e)';
+            }
+        }
+
+        function nextLevel() {
+            if (currentLevel < 5) {
+                currentLevel++;
+            } else {
+                currentLevel = 1;
+                totalScore = 0;
+            }
+            startNewGame();
+        }
+
+        function retryLevel() {
+            startNewGame();
+        }
+
+        document.getElementById('guessInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeGuess();
+            }
+        });
+
+        startNewGame();
+    </script>
+</body>
+</html>

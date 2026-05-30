@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gen Z Vibe Check Treasure Hunt</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for aesthetic */
+        body {
+            font-family: 'Inter', sans-serif;
+            /* UPDATED: Background from #B2AC88 and #F5F5DC to your new palette */
+            background: linear-gradient(135deg, #6b7f5e 0%, #e8ebe4 100%); 
+            color: #1f2937; /* Change text color to dark for contrast with light background */
+            min-height: 100vh;
+        }
+        .game-card {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+            border: 2px solid #8a9a7e;
+            animation: fadeIn 0.8s ease-out;
+            /* UPDATED: Default card background color for non-traps */
+            background-color: #f5f5f0; 
+            color: #1f2937; /* Ensure card text is dark */
+        }
+        /* UPDATED: Button primary color and hover */
+        .btn-primary {
+            background-color: #6b7f5e; /* Primary Button Color */
+            color: #f5f5f0; /* Button Text Color */
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-primary:hover {
+            background-color: #8a9a7e; /* Slightly lighter on hover */
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px #6b7f5e;
+        }
+        .trap-text {
+            color: #b91c1c; /* Keep trap text a clear red for warning */
+            font-weight: 700;
+            animation: shake 0.5s;
+        }
+        .meme-image {
+            margin: 1.5rem auto;
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.5rem;
+            object-fit: cover;
+        }
+        /* Style for Stage headings */
+        .stage-heading {
+            color: #6b7f5e; /* Use primary color for stage headings */
+        }
+        /* New classes for Trap backgrounds using new colors */
+        .trap-color-1 { background-color: #6b7f5e !important; color: #f5f5f0 !important; }
+        .trap-color-2 { background-color: #8a9a7e !important; color: #f5f5f0 !important; }
+        .trap-color-3 { background-color: #e8ebe4 !important; color: #1f2937 !important; }
+        .trap-color-4 { background-color: #f5f5f0 !important; color: #1f2937 !important; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+
+    <audio id="sfx-success" preload="auto">
+        <source src="correct-choice-43861.mp3" type="audio/mpeg">
+        <source src="correct-choice-43861.ogg" type="audio/ogg">
+    </audio>
+    <audio id="sfx-trap" preload="auto">
+        <source src="fail-144746.mp3" type="audio/mpeg">
+        <source src="fail-144746.ogg" type="audio/ogg">
+    </audio>
+
+    <audio id="sfx-ddlj-bkg" loop preload="auto">
+        <source src="ddlj.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="sfx-victory" preload="auto">
+        <source src="gta_mission_passed.mp3" type="audio/mpeg">
+    </audio>
+    <div id="gameContainer" class="game-card p-8 rounded-xl w-full max-w-lg text-center"> 
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <img class="meme-image w-32" src="https://i.imgflip.com/30b1gx.jpg" alt="Drake Hotline Bling Meme">
+            <img class="meme-image w-32" src="https://i.imgflip.com/1ur9b0.jpg" alt="Distracted Boyfriend Meme">
+            <img class="meme-image w-32" src="https://i.imgflip.com/26am.jpg" alt="Grumpy Cat Meme">
+            <img class="meme-image w-32" src="https://i.imgflip.com/2wifvo.jpg" alt="Surprised Pikachu Meme">
+            <img class="meme-image w-32" src="https://i.imgflip.com/4/4t0m5.jpg" alt="Change My Mind Meme">
+        </div>
+    </div>
+
+    <script>
+        // --- GAME LOGIC (JavaScript is mandatory for working browser buttons) ---
+
+        // Game state variables
+        let currentStage = 0;
+        const stages = [
+            {
+                prompt: "Welcome to the Vibe Check Treasure Hunt. The treasure is a fat stack of digital clout. Are you ready to proceed? (No cap.)",
+                meme: "✨",
+                choices: [
+                    { text: "Bet, I'm ready", target: 1 },
+                    { text: "I'm good, thanks", target: 'trap_quit' }
+                ]
+            },
+            {
+                prompt: " The Meme Maze. You see two doors. One has 'Cheugy Vibes' and the other has 'Main Character Energy'. Which one is the right path?",
+                meme: "🚪",
+                choices: [
+                    { text: "Cheugy Vibes (Left)", target: 'trap_cheugy' },
+                    { text: "Main Character Energy (Right)", target: 2 }
+                ]
+            },
+            {
+                prompt: " The Social Media Scroll. Your feed is stuck. To unlock the next path, what is the official Gen Z response to something painfully awkward or cringe?",
+                meme: "💀",
+                choices: [
+                    { text: "That's Awkward!", target: 'trap_old' },
+                    { text: "I'm screaming 😭", target: 3 },
+                    { text: "Hard Pass", target: 'trap_hardpass' }
+                ]
+            },
+            {
+                prompt: " The Coffee Trap. You've earned a break. A barista asks for your order. What's the only acceptable drink order that proves you are, in fact, the final boss?",
+                meme: "☕️",
+                choices: [
+                    { text: "Black Coffee", target: 'trap_boomer' },
+                    { text: "Water, no ice.", target: 4 }, 
+                    { text: "A Pumpkin Spice Latte", target: 'trap_psl' }
+                ]
+            },
+            {
+                prompt: "The Indian Vibe Check. You are at a family wedding. Your *Massi* (aunt) asks, 'When are you finally settling down?' What is the only acceptable Gen Z survival mechanism?",
+                meme: "😬",
+                choices: [
+                    { text: "Smile and nod politely (major red flag)", target: 'trap_polite' },
+                    { text: "Say, 'Bhai, yeh kya chal raha hai?' and point to the craziest dancer.", target: 5 },
+                    { text: "Change the subject to your new NFT collection.", target: 'trap_crypto' }
+                ]
+            },
+            // STAGE 5 (Index 5)
+            {
+                prompt: `The Dating App Dilemma. You see this bio. Which line suggests they are 'relationship coded' (subtle red flag in a casual scene)?
+                        <img class="meme-image" src="dating.jpg" onerror="this.src='https://placehold.co/400x150/50009c/FFFFFF?text=Error'" alt="Dating App Bio Placeholder">`,
+                meme: "📱",
+                choices: [
+                    { text: "Just here for a good time.", target: 'trap_too_basic' },
+                    { text: "My friends made me do it.", target: 6 }, // Correct: Indicates drama/not taking responsibility
+                    { text: "Swipe right if you can handle my dog pics.", target: 'trap_too_wholesome' }
+                ]
+            },
+            // STAGE 6 (Index 6)
+            {
+                prompt: `The Indian Cinema Challenge. You see a clip from a classic film. To earn your next clue, which line is the modern, ironic summary of the film's core emotion (e.g., intense melodrama)
+                        <img class="meme-image" src="ddlj.jpg" onerror="this.src='https://placehold.co/400x150/1e40af/FFFFFF?text=Error'" alt="DDLJ Aesthetic Clip">`,
+                meme: "🎬",
+                choices: [
+                    { text: "This movie understood the assignment.", target: 'trap_vague' },
+                    { text: "This is my toxic trait.", target: 7 }, // Correct: Ironic self-deprecating summary
+                    { text: "I ship them.", target: 'trap_generic_ship' }
+                ]
+            },
+            // STAGE 7 (Index 7)
+            {
+                prompt: ` The Financial Flex. Your rich cousin asks you what your financial goals are. Which answer maintains peak financial cringe/irony?
+                        <img class="meme-image" src="crpto.webp" onerror="this.src='https://placehold.co/400x150/065f46/FFFFFF?text=Error'" alt="Crypto Graph Meme">`,
+                meme: "💰",
+                choices: [
+                    { text: "Invest in blue-chip stocks.", target: 'trap_serious' },
+                    { text: "To be independently wealthy from trading Dogecoin and selling *ghar ka khana*.", target: 8 }, // Correct: Ironic, low-effort flex
+                    { text: "I want to become a CEO.", target: 'trap_too_ambitious' }
+                ]
+            },
+            // FINAL STAGE (Index 8) - UPDATED: Stage Heading is now "Aura Positive Achieved"
+            {
+                prompt: "Final Stage: The Treasure! You have successfully passed the Vibe Check and achieved peak Main Character status. Your digital clout score is 10/10. You win! (Bhai, full too sahi khel gaya!)",
+                meme: "🏆",
+                choices: [
+                    { text: "Claim your clout (Start Over)", target: 0 }
+                ]
+            }
+        ];
+
+        // Trap definitions (UPDATED with new custom color classes)
+        const traps = {
+            'trap_quit': { prompt: "Trap! Sike. You thought you could just leave? That's not the assignment. Restart the game and commit to the grind. Your vibe check failed.", meme: "❌", color: "trap-color-1", button: "Try Again (Drip Check)", target: 0 },
+            'trap_cheugy': { prompt: "Trap! Oof. Picking 'Cheugy Vibes' automatically fails the challenge. That's a huge L. Your reward is hearing a 10-hour loop of the 'Baby Shark' song. Sorry, not sorry.", meme: "🦈", color: "trap-color-2", button: "Restart the Mission", target: 0 },
+            'trap_old': { prompt: "Trap! That's what your dad says. The correct answer was a mix of intense laughter and crying emojis. You're giving major boomer energy right now. This is awkward.", meme: "👴", color: "bg-red-700", button: "Vibe Check Redo", target: 0 },
+            'trap_psl': { prompt: "Trap! PSL is so basic. You're doing too much. The real flex is minimal effort. You are now required to film a perfectly choreographed TikTok dance.", meme: "💃", color: "bg-pink-600", button: "Not Me (Restart)", target: 0 },
+            'trap_hardpass': { prompt: "Trap! 'Hard Pass' is acceptable, but it's not the *official* cringe response. The trap is a mandatory 3-hour phone call with a telemarketer about their extended warranty.", meme: "📞", color: "bg-red-500", button: "Escape the Call (Restart)", target: 0 },
+            'trap_boomer': { prompt: "Trap! Black coffee? You're acting like you have responsibilities. Gen Z knows how to maximize minimal effort. Go sit in the corner and reflect on your life choices.", meme: "🛋️", color: "trap-color-3", button: "I'm Better Than This (Restart)", target: 0 },
+            'trap_polite': { prompt: "Trap! Being polite is a trap! You get cornered for the next hour with follow-up questions. 'Beta, what about that government job?' The cringe is maximum.", meme: "🫠", color: "bg-red-400", button: "Run Away (Restart)", target: 0 },
+            'trap_crypto': { prompt: "Trap! Talking about crypto just confuses them. Now you have to explain NFTs to your *Massi*. The cringe is unbearable. Restart before your *mama* joins the conversation.", meme: "📉", color: "bg-amber-700", button: "Exit Scam (Restart)", target: 0 },
+            'trap_textbook': { prompt: "Trap! Too obvious! That was last decade's move. Your punishment is 3 hours of mandatory family status updates on Facebook. Hope you like boomer memes.", meme: "🤳", color: "bg-red-800", button: "Delete Socials (Restart)", target: 0 },
+            'trap_chappal': { prompt: "Trap! Never mess with the *chappal*. The flying sandal of fate has found you. Instant K.O. (Kirani Office). You lose the round. Restart and show some respect.", meme: "👠", color: "bg-red-900", button: "Seek Forgiveness (Restart)", target: 0 },
+            'trap_too_basic': { prompt: "Trap! 'Just here for a good time' is too basic, too Millennial. You need *nuance*. Your penalty is watching a 4-hour YouTube video essay on the history of filters.", meme: "😵", color: "bg-blue-600", button: "Take the L (Restart)", target: 0 },
+            'trap_too_wholesome': { prompt: "Trap! Dog pics are cute, but too wholesome for the vibe check. You've earned a week of mandatory 'motivational quotes' posts on LinkedIn.", meme: "🐶", color: "bg-green-600", button: "Unsubscribe (Restart)", target: 0 },
+            'trap_vague': { prompt: "Trap! 'Understood the assignment' is Vague. It lacks ironic depth. The penalty is using only the 'Crying Laughing' emoji (😂) for the next 24 hours.", meme: "😅", color: "bg-purple-600", button: "Go Deeper (Restart)", target: 0 },
+            'trap_generic_ship': { prompt: "Trap! 'I ship them' is too generic! You're clearly not locked into the cinematic universe lore. The penalty is having to explain the entire plot of a 90s film to a 5-year-old.", meme: "🚢", color: "bg-teal-600", button: "Rewind (Restart)", target: 0 },
+            'trap_serious': { prompt: "Trap! Blue-chip stocks? That's giving 401k vibes. You need an answer that screams 'I don't care, but also, look at my hustle.' Penalty: Mandatory reading of a 500-page finance book.", meme: "📘", color: "trap-color-4", button: "Too Much Work (Restart)", target: 0 },
+            'trap_too_ambitious': { prompt: "Trap! CEO? That's too much ambition, too much stress. You need passive income and chill. Penalty: You have to wear business formal attire to the next three family functions.", meme: "👔", color: "bg-stone-600", button: "Take Off The Tie (Restart)", target: 0 }
+        };
+
+        const gameContainer = document.getElementById('gameContainer');
+
+        // Get Audio Elements
+        const sfxSuccess = document.getElementById('sfx-success');
+        const sfxTrap = document.getElementById('sfx-trap');
+        
+        // NEW: Get Background Audio Elements
+        const sfxDdljBkg = document.getElementById('sfx-ddlj-bkg');
+        const sfxVictory = document.getElementById('sfx-victory');
+
+
+        // Function to render the current stage or trap
+        function render(id) {
+            gameContainer.innerHTML = ''; // Clear previous content
+            
+            // --- AUDIO CONTROL LOGIC ---
+            // Stop all special background music before starting a new stage
+            sfxDdljBkg.pause();
+            sfxVictory.pause();
+
+            let data, isTrap = false;
+            
+            if (typeof id === 'number') {
+                data = stages[id];
+                
+                // LOGIC FOR DDLJ SONG (Stage Index 6)
+                if (id === 6) {
+                    sfxDdljBkg.currentTime = 0;
+                    sfxDdljBkg.play().catch(e => console.log("DDLJ BGM blocked:", e));
+                }
+
+                // LOGIC FOR VICTORY SONG (Final Stage Index 8)
+                if (id === 8) {
+                    sfxVictory.currentTime = 0;
+                    sfxVictory.play().catch(e => console.log("Victory SFX blocked:", e));
+                }
+
+            } else if (typeof id === 'string' && id.startsWith('trap_')) {
+                data = traps[id];
+                isTrap = true;
+            } else {
+                console.error("Invalid stage ID.");
+                return;
+            }
+            // --- END AUDIO CONTROL LOGIC ---
+
+            // Determine card styling based on whether it's a trap or a regular stage
+            const stageIndex = stages.findIndex(s => s === data);
+            const rawStageNumber = stageIndex !== -1 ? stageIndex + 1 : null; 
+            
+            // Logic for Stage Heading Text:
+            let headingText;
+            if (isTrap) {
+                headingText = 'TRAP ALERT! (Major L)';
+            } else if (stageIndex === stages.length - 1) { // Final Stage (Index 8)
+                headingText = '🎉Aura Positive🎉'; // Use the requested phrase
+            } else {
+                headingText = `Stage ${rawStageNumber} Vibe Check`;
+            }
+
+
+            // UPDATED: Use custom class for trap and default for regular stage
+            const cardClasses = isTrap ? `game-card p-8 rounded-xl w-full max-w-lg text-center ${data.color}` : 'game-card p-8 rounded-xl w-full max-w-lg text-center';
+
+            const newContent = document.createElement('div');
+            newContent.className = cardClasses;
+            newContent.innerHTML = `
+                <div class="text-6xl mb-6 animate-pulse">${data.meme}</div>
+                <h1 class="text-3xl font-extrabold mb-4 ${isTrap ? 'trap-text' : 'stage-heading'}">${headingText}</h1>
+                <p class="text-xl mb-8 leading-relaxed">${data.prompt}</p>
+                <div id="choices" class="space-y-4">
+                    </div>
+            `;
+            
+            gameContainer.appendChild(newContent);
+            
+            const choicesContainer = document.getElementById('choices');
+            
+            // If it's a trap, only show one button to restart
+            if (isTrap) {
+                const button = document.createElement('button');
+                // UPDATED: Use general btn-primary class which is styled in CSS
+                button.className = 'w-full py-3 px-6 rounded-lg font-bold btn-primary focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50';
+                button.textContent = data.button;
+                // Note: No need to play sfx here, handleChoice plays trap sound
+                button.onclick = () => { currentStage = data.target; render(currentStage); };
+                choicesContainer.appendChild(button);
+                return;
+            }
+
+            // If it's a regular stage, show all choices
+            data.choices.forEach(choice => {
+                const button = document.createElement('button');
+                // UPDATED: Use general btn-primary class which is styled in CSS
+                button.className = 'w-full py-3 px-6 rounded-lg font-bold btn-primary focus:outline-none focus:ring-4 focus:ring-indigo-500 focus:ring-opacity-50';
+                button.textContent = choice.text;
+                // Pass the choice's target to the handler
+                button.onclick = () => handleChoice(choice.target);
+                choicesContainer.appendChild(button);
+            });
+        }
+
+        // Function to handle button clicks 
+        function handleChoice(target) {
+            if (typeof target === 'number') {
+                // SUCCESS: Play success sound and move to the next stage
+                sfxSuccess.currentTime = 0; // Rewind the audio
+                sfxSuccess.play().catch(e => console.log("Success audio blocked:", e));
+
+                currentStage = target;
+                render(currentStage);
+            } else if (typeof target === 'string' && target.startsWith('trap_')) {
+                // TRAP: Play trap/beep sound and show the trap
+                sfxTrap.currentTime = 0; // Rewind the audio
+                sfxTrap.play().catch(e => console.log("Trap audio blocked:", e));
+
+                // IMPORTANT: Stop DDLJ music when hitting a trap
+                sfxDdljBkg.pause();
+                sfxDdljBkg.currentTime = 0;
+                
+                render(target);
+            } else {
+                console.error("Unknown target.");
+            }
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            render(currentStage);
+        });
+
+    </script>
+</body>
+</html>

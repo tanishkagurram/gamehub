@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Games Hub</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-weight: bold;
+            background: linear-gradient(135deg, #e8ebe4 0%, #f5f5f0 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .title {
+            font-size: 32px;
+            color: #6b7f5e;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 18px;
+            color: #8a9a7e;
+        }   
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .game-card {
+            background: #f5f5f0;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(107, 127, 94, 0.2);
+            padding: 30px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 2px solid #8a9a7e;
+        }
+
+        .game-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(107, 127, 94, 0.3);
+        }
+
+        .game-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .game-title {
+            font-size: 24px;
+            color: #6b7f5e;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .game-description {
+            color: #8a9a7e;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, #6b7f5e, #8a9a7e);
+            color: #f5f5f0;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(135deg, #8a9a7e, #6b7f5e);
+        }
+
+        .footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #8a9a7e;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">🎮 Mini Games Hub</h1>
+        <p class="subtitle">Choose your adventure and have fun!</p>
+    </div>
+
+    <div class="games-grid">
+        <div class="game-card">
+            <div class="game-icon">⭕</div>
+            <h2 class="game-title">Tic Tac Toe</h2>
+            <p class="game-description">The timeless strategy game! Play against a friend or challenge the computer in single-player mode.</p>
+            <a href="code (1).html" class="play-button">Play Now</a>
+        </div>
+
+        <div class="game-card">
+            <div class="game-icon">🎯</div>
+            <h2 class="game-title">Hangman</h2>
+            <p class="game-description">Challenge yourself with word puzzles! Play against the computer or challenge a friend in multiplayer mode.</p>
+            <a href="hangman1.html" class="play-button">Play Now</a>
+        </div>
+
+        <div class="game-card">
+            <div class="game-icon">✂️</div>
+            <h2 class="game-title">Rock Paper Scissors</h2>
+            <p class="game-description">Classic game of chance! Battle against the computer and try to reach 5 wins first.</p>
+            <a href="rock-paper-scissors.html" class="play-button">Play Now</a>
+        </div>
+
+        <div class="game-card">
+            <div class="game-icon">🏴‍☠️</div>
+            <h2 class="game-title">Treasure Hunt</h2>
+            <p class="game-description">Embark on a Gen Z vibe check adventure! Navigate through memes and challenges to find the ultimate treasure.</p>
+            <a href="tresurehunt_uadate/mini project/game/tresure.html" class="play-button">Play Now</a>
+        </div>
+
+        <div class="game-card">
+            <div class="game-icon">🔢</div>
+            <h2 class="game-title">Number Guessing Game</h2>
+            <p class="game-description">Test your intuition by guessing mystery numbers across different levels. Each level brings new challenges and hints!</p>
+            <a href="number_game/number_game/guessing-game-html.html" class="play-button">Play Now</a>
+        </div>
+
+
+    </div>
+
+    <div class="footer">
+        <p>Enjoy these mini games! Each one is crafted with care and fun in mind. 🎉</p>
+    </div>
+</body>
+</html>
